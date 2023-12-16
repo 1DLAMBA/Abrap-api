@@ -121,7 +121,7 @@ class UserController extends Controller
         $user = User::findorfail($id);
         
         $user->update([
-            'reject' => 'reject',
+            'approved' => 'rejected',
         ]);
         
     }
@@ -147,7 +147,7 @@ class UserController extends Controller
     {
     $users = User::with('loans')->get();
     $activetotal = User::where('active','activate')->sum('loan_amount');
-    $loaninterest = Loan::sum('interest');
+    $loaninterest = Loan::sum('loan_amount');
     $loanpaid = Loan::sum('amount_paid_so_far');
     
     return response()->json([
@@ -165,7 +165,7 @@ class UserController extends Controller
     }
     public function showunapproved(string $id)
     {
-    $users = User::find($id);
+    $users = User::with('loans')->find($id);
     return response()->json(['users' => $users]);
     }
 

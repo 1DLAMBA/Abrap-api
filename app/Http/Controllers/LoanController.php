@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Loan;
+use Illuminate\Support\Facades\Log;
+
 use Illuminate\Http\Request;
 
 class LoanController extends Controller
@@ -99,7 +101,7 @@ class LoanController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Loan $loanId)
+    public function update(string $loanId)
     {
         
 
@@ -117,7 +119,7 @@ class LoanController extends Controller
 
         // Save the updated loan details
         $loan->save();
-        
+        Log::alert('clicked');
         return response()->json(['success' => 'User has paid']);
     }
 
