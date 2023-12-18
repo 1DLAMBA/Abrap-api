@@ -36,14 +36,14 @@ class LoanController extends Controller
 
         // Calculate other loan details
         $monthlyInterestRate = 3.5 / 100;
-        $interest = $loanAmount * $monthlyInterestRate;
-        $monthlyInterest = $interest / $installmentPeriod;
+        $monthlyInterest = $loanAmount * $monthlyInterestRate;
+        $interest = $installmentPeriod * $monthlyInterest;
         $monthlyPaymentWithoutInterest = $loanAmount / $installmentPeriod;
         $loanPeriod = $installmentPeriod; // Assuming loan period is the same as installment period initially
         $monthsPaid = 0;
         $monthsLeft = $installmentPeriod;
         $totalRepayment = $loanAmount + $interest;
-        $monthlyPaymentWithInterest = $monthlyPaymentWithoutInterest + $monthlyInterest;
+        $monthlyPaymentWithInterest = $totalRepayment / $loanPeriod;
         $amountPaidSoFar = 0;
         $outstanding = $totalRepayment;
 
