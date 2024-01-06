@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Loan;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-
 use Illuminate\Http\Request;
 
 class LoanController extends Controller
@@ -73,6 +74,64 @@ class LoanController extends Controller
 
     }
 
+    public function recreate(Request $request)
+    {
+        $request->validate([
+            'user_id'=>'',
+            'loan_amount' => 'required|numeric|min:1',
+            'installment_period' => 'required|integer|min:1',
+        ]);
+
+        // Extract input data
+        $user_id=$request->input('user_id');
+        $has_loan=Loan::find($user_id);
+        $loanAmount = $request->input('loan_amount');
+        $user = User::find($user_id);
+        $installmentPeriod = $request->input('installment_period');
+        $user->loan_amount = $loanAmount;
+        $user->installment_period = $installmentPeriod;
+        $user->save();
+
+
+        // Calculate other loan details
+        $monthlyInterestRate = 3.5 / 100;
+        $monthlyInterest = $loanAmount * $monthlyInterestRate;
+        $interest = $installmentPeriod * $monthlyInterest;
+        $monthlyPaymentWithoutInterest = $loanAmount / $installmentPeriod;
+        $loanPeriod = $installmentPeriod; // Assuming loan period is the same as installment period initially
+        $monthsPaid = 0;
+        $monthsLeft = $installmentPeriod;
+        $totalRepayment = $loanAmount + $interest;
+        $monthlyPaymentWithInterest = $totalRepayment / $loanPeriod;
+        $amountPaidSoFar = 0;
+        $outstanding = $totalRepayment;
+
+       
+
+        // Insert data into the Loan table
+        $loan = new Loan();
+        
+        $loan->user_id = $request->input('user_id');
+        $loan->loan_amount = $loanAmount;
+        $loan->installment_period = $installmentPeriod;
+        $loan->monthly_interest = $monthlyInterest;
+        $loan->interest = $interest;
+        $loan->monthly_payment_without_interest = $monthlyPaymentWithoutInterest;
+        $loan->loan_period = $loanPeriod;
+        $loan->months_paid = $monthsPaid;
+        $loan->months_left = $monthsLeft;
+        $loan->total_repayment = $totalRepayment;
+        $loan->monthly_payment_with_interest = $monthlyPaymentWithInterest;
+        $loan->amount_paid_so_far = $amountPaidSoFar;
+        $loan->outstanding = $outstanding;
+        $loan->save();
+        
+        return response()->json([
+            'loan'=>$loan
+        ]);
+
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -93,9 +152,19 @@ class LoanController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Loan $loan)
+    public function edit(Request $request, string $id)
     {
-        //
+        Log::debug($request->admin_charges);
+       $request->validate([
+            'admin_charges'=> 'required|string'
+        ]);
+        $user = Loan::where('user_id', $id)->firstOrFail();
+        $user->admin_charges = $request->admin_charges;
+        $user->save();
+
+        return response()->json([
+            'success' => 'operation succesful'
+        ]);
     }
 
     /**
@@ -126,8 +195,24 @@ class LoanController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Loan $loan)
+    public function destroy(string $id)
     {
-        //
+        $loan = Loan::where('user_id', $id)->first();
+
+        if ($loan) {
+            $loan->delete();
+        }
+    
+        $user = User::findOrFail($id);
+    
+        // Set the columns to null
+        $user->installment_period = null;
+        $user->loan_amount = null;
+        $user->active = null;
+    
+        $user->save();
+    
+        return response()->json(['success' => 'Operation Successful']);
+
     }
 }

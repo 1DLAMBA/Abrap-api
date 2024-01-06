@@ -34,6 +34,9 @@ Route::post('/user/extra/{id}', [UserController::class, 'register2']);
 Route::post('/user/account/{id}', [UserController::class, 'account']);
 Route::post('/user/activate/{id}', [UserController::class, 'activate']);
 Route::get('/user/update/{id}', [LoanController::class, 'update']);
+Route::post('/user/admincharge/{id}', [LoanController::class, 'edit']);
+Route::delete('/user/loan/destroy/{id}', [LoanController::class, 'destroy']);
+
 Route::post('/upload', [FileUploadController::class, 'upload'])->name('file.upload');
 Route::post('/multi-upload', [FileUploadController::class, 'multiUpload']);
 
@@ -41,4 +44,5 @@ Route::get('/file/get/{filename}/{visibility?}', [FileUploadController::class, '
 
 
 Route::post('/user/loan', [LoanController::class, 'create']);
+Route::post('/user/loanagain', [LoanController::class, 'recreate']);
 Route::get('/user/loan/update/{id}', [LoanController::class, 'upload']);
