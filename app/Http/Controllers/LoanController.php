@@ -10,9 +10,12 @@ use Illuminate\Http\Request;
 
 class LoanController extends Controller
 {
+    
     /**
      * Display a listing of the resource.
      */
+
+     
     public function index()
     {
         //
@@ -53,7 +56,7 @@ class LoanController extends Controller
         // Insert data into the Loan table
         $loan = new Loan();
         
-        $loan->user_id = $request->input('user_id');
+        $loan->user_id = $$this->userId;
         $loan->loan_amount = $loanAmount;
         $loan->installment_period = $installmentPeriod;
         $loan->monthly_interest = $monthlyInterest;
@@ -86,7 +89,8 @@ class LoanController extends Controller
         $user_id=$request->input('user_id');
         $has_loan=Loan::find($user_id);
         $loanAmount = $request->input('loan_amount');
-        $user = User::find($user_id);
+        $user=User::where('id',$user_id)->firstOrFail();
+        $admin_interest = $user->admin_interest;
         $installmentPeriod = $request->input('installment_period');
         $user->loan_amount = $loanAmount;
         $user->installment_period = $installmentPeriod;
@@ -94,7 +98,7 @@ class LoanController extends Controller
 
 
         // Calculate other loan details
-        $monthlyInterestRate = 3.5 / 100;
+        $monthlyInterestRate = $admin_interest / 100;
         $monthlyInterest = $loanAmount * $monthlyInterestRate;
         $interest = $installmentPeriod * $monthlyInterest;
         $monthlyPaymentWithoutInterest = $loanAmount / $installmentPeriod;
