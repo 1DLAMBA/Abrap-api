@@ -64,6 +64,8 @@ class User extends Authenticatable
         'guarantor2_identification_file2',
         'purpose_of_loan',
         'approved',
+        'contract',
+        'admin_interest',
         'email_verified_at',
         'password',
         

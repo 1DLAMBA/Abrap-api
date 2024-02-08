@@ -4,13 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Loan;
 use App\Models\User;
+use App\Services\LoanService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
+
 class UserController extends Controller
 {
+    protected $loanService;
 
+    public function __construct(LoanService $loanService)
+    {
+        $this->loanService = $loanService;
+    }
     public function login(Request $request)
     {
         $request->validate([
@@ -107,12 +114,21 @@ class UserController extends Controller
 
     public function activate(Request $request, String $id){
         $request->validate([
-            'active'=>''
+            'active'=>'',
+            'admin_interest'=>''
         ]);
         $user = User::findorfail($id);
+        $userId = $id;
+        $loan_amount = $user->loan_amount;
+        $admin_interest = $request->admin_interest;
+        $installment_period = $user->installment_period;
+        // $loanController = [LoanController::class, 'create'];
+        $this->loanService->createLoan($userId, $loan_amount, $installment_period, $admin_interest);
+        // $Loan = new LoanController($userId, $loan_amount, $installment_period, $admin_interest);
         
         $user->update([
             'active' => $request->active,
+            'admin_interest' => $request->admin_interest,
         ]);
         
     }
@@ -171,14 +187,25 @@ class UserController extends Controller
 
 
 
-    public function approve(string $id){
+    public function approve(Request $request, string $id){
+
+       $admin_interst= $request->admin_interest;
         $user= User::findorfail($id);
         Log::alert('user', [$user]);
         $user->approved = 'approved';
+        $user->admin_interest = $admin_interst;
         $user->save();
 
         return response()->json([
             'Approved'=>'Your application has been approved'
         ]);
+    }
+
+    public function contract(Request $request, string $id){
+        $user =  User::findorfail($id);
+        $contractFile = $request->contract;
+        $user->contract = $contractFile;
+        $user->save();
+
     }
 }

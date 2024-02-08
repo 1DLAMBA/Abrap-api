@@ -13,7 +13,7 @@ class fileUploadController extends Controller
     {
         return DB::transaction(function () use ($request) {
             $validated = $this->validate($request, [
-                'file' => 'required|file|mimes:pdf,png,jpg,jpeg,doc,docx|max:2048',
+                'file' => 'required|file|mimes:pdf,png,jpg,jpeg,doc,docx|max:4048',
                 'visibility' => ['nullable']
             ]);
 
@@ -45,7 +45,7 @@ class fileUploadController extends Controller
 
                 $validator = Validator::make(
                     ['file' => $file],
-                    ['file' => 'required|file|mimes:jpg,png,jpeg|max:2048'],
+                    ['file' => 'required|file|mimes:jpg,png,jpeg|max:4048'],
                     ['file' => 'One of the files you are trying to upload does not meet our upload requirement.']
                 );
 
